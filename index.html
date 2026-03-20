@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>齐民要术（游戏版🎮）</title>
+    <link rel="shortcut icon" " href="./img/333.png" type="image/x-icon">
+    <style>
+/* 网页小精灵容器 */
+.sprite {
+    position: absolute;
+    will-change: transform;
+    /* 增加透明度过渡，让出现和消失更平滑 */
+    opacity: 0; 
+    transition: opacity 1s ease-in-out;
+    pointer-events: none;
+    z-index: 9998;
+}
+
+/* 当加上这个类名时，小精灵显示 */
+.sprite.active {
+    opacity: 1;
+}
+
+#music-player-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50px 25px 25px 50px;
+    padding: 8px 18px 8px 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.disc-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border: 2px solid #fff;
+    flex-shrink: 0;
+}
+
+.disc-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    animation: rotate 6s linear infinite;
+    animation-play-state: paused;
+}
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.player-controls-box {
+    margin-left: 15px;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 0.5s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+
+#music-player-container:hover .player-controls-box {
+    max-width: 220px;
+}
+
+.music-info-text {
+    margin: 0;
+    padding: 0;
+}
+
+.music-title { font-size: 14px; font-weight: bold; color: #333; display: block; }
+.music-artist { font-size: 11px; color: #666; }
+
+.buttons-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 3px;
+}
+
+.ctrl-btn {
+    cursor: pointer;
+    font-size: 16px;
+    color: #444;
+    transition: 0.2s;
+    user-select: none;
+}
+
+.ctrl-btn:hover { color: #e73c7e; transform: scale(1.2); }
+
+
+.volume-box {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#volume-slider {
+    width: 60px;
+    height: 4px;
+    cursor: pointer;
+    accent-color: #e73c7e;
+}
+
+@media (max-width: 600px) {
+    #music-player-container { transform: scale(0.85); left: 5px; bottom: 10px; }
+}
+
+
+.pulse-guide {
+    animation: attention 1.5s infinite ease-in-out;
+    border: 3px solid #e73c7e !important; /* 增加一个明显的边框色 */
+}
+
+@keyframes attention {
+    0% { transform: scale(1); box-shadow: 0 0 0px rgba(231, 60, 126, 0.4); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(231, 60, 126, 0.8); }
+    100% { transform: scale(1); box-shadow: 0 0 0px rgba(231, 60, 126, 0.4); }
+}
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: #333;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+                .container {
+            width: 95%;
+            max-width: 900px;
+            margin: 40px 10px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            line-height: 1.8;
+        }
+        
+                h1 {
+            text-align: center;
+            font-size: 2.2em;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            text-align: center;
+            color: #e73c7e;
+            border-bottom: 2px dashed #e73c7e;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        
+                .highlight-red { color: #d63031; font-weight: bold; }
+        .highlight-blue { color: #0984e3; font-weight: bold; }
+        .underline { text-decoration: underline; }
+        .center-text { text-align: center; display: block; }
+        .bold-text { font-weight: bold; }
+        
+       
+        details {
+            margin-bottom: 15px;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+            display: block;
+        }
+        
+        summary {
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            outline: none;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #2d3436;
+        }
+        
+        summary:hover { background: #f9f9f9; }
+        
+        summary::after { content: "➕"; font-size: 0.8em; transition: 0.3s; }
+        details[open] summary::after { content: "➖"; transform: rotate(180deg); }
+        
+        .details-content {
+            padding: 0 20px 20px 20px;
+            border-top: 1px solid #f1f1f1;
+        }
+        
+       
+        .tutorial-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            display: block;
+            margin: 15px auto;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border: 2px solid #fff;
+        }
+        
+        .img-caption {
+            text-align: center;
+            font-size: 0.85em;
+            color: #636e72;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        
+        .site-card {
+            background: #f8f9fa;
+            border-left: 4px solid #23a6d5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        a { color: #0984e3; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; color: #e73c7e; }
+        
+        
+        .point { color: #e73c7e; font-weight: bold; margin-right: 5px; }
+        
+        @media (max-width: 600px) {
+            .container { padding: 15px; width: 98%; }
+            h1 { font-size: 1.6em; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>✨ 游戏资源与联机保姆级教程 ✨</h1>
+
+        <div class="center-text" style="background: #fff3f3; padding: 15px; border-radius: 15px; border: 1px solid #ffcdd2; margin-bottom: 20px;">
+            <p><b>一、</b> 市面上的游戏分为盗版和正版，盗版又称“破解版”和“学习版”，究其本质是在游戏文件内注入破解补丁，破解游戏加密，绕开Steam正版加密检测机制，其游戏内容并无差别 🎮</p>
+            <p><b>二、</b> 盗版游戏与正版游戏最大的区别就是<span class="highlight-red underline">多人联机和好友联机</span>，因此大多数盗版游戏是单机游戏，此教程将告诉你如何<span class="highlight-blue">打通第三面墙</span>，解决好友之间的联机问题。多人联机是指某个游戏玩的人多，服主开的私人服务器，如果能在联机大厅内搜索到服务器即可加入，与好友之间联机方法同理 🤝</p>
+            <p><b>三、</b> <span class="highlight-red">【注意】</span>盗版游戏无法与正版联机，也无法玩大型多人网游，只能让<span style="color:#ff0000;">盗版和盗版联机，版本号和版本号一样的联机</span> ⚠️</p>
+            <p class="bold-text center-text" style="color: #6c5ce7;">（此教程侧重于盗版资源下载、盗版如何联机、D加密资源如何食用等方法🙂）</p>
+        </div>
+
+        <h2>📦 资源的获取和下载</h2>
+        <p class="center-text bold-text">以下网站资源全为 <span class="highlight-red">免费</span>！<br>如有需求只需注册即可 🔑</p>
+
+        <details open>
+            <summary>💡 一、事先声明：网盘会员问题</summary>
+            <div class="details-content">
+                <p><b>注：由于大部分资源需要网盘保存并下载，但是网盘下载速度受限制，需要充SVIP才可以提速，所以先告诉大家如何获取会员</b> 🚀</p>
+                <p><span class="point">▶</span> 网盘的会员大部分都是包月的，所以我们<span class="highlight-blue underline">只需要购买一天的会员</span>即可。</p>
+                <p><b>1.</b> 以夸克为例，打开<b>拼夕夕</b>，只需几毛钱，购买一天时长的夸克会员，按商家给的方法操作即可 💰</p>
+
+                <img src="./img/input_file_0.png" alt="拼夕夕购买夸克会员" class="tutorial-img">
+                <p class="img-caption">▲ 拼夕夕搜索“网盘24小时会员”</p>
+
+                <p><b>2.</b> 如果你连几毛钱都没有的话，那么你需要经常在拼夕夕购买东西，然后给买过的商品写评论，然后他就会返你几块钱到你的多多钱包里 👛</p>
+
+                <img src="./img/input_file_1.png" alt="多多钱包余额" class="tutorial-img" style="max-width: 400px;">
+                <p class="img-caption">▲ 通过评价返现，白嫖会员不是梦</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>🛠️ 二、游戏的解压与安装（新手必看）</summary>
+            <div class="details-content">
+                <p><span class="highlight-red bold-text">注：如果需要解压密码，通常在下载资源的网页里写着，仔细去找找就行！</span>🔍</p>
+                <p><b>1. 压缩包解压</b></p>
+                <p>由于大部分游戏本体非常大，所以游戏文件常被拆分成许多小份并压缩成压缩包上传到网盘（例如xxx.part.数字.压缩格式）。想要游玩只需要把下好的压缩包<span class="highlight-blue underline">全部选中解压</span>或者<span class="highlight-blue underline">解压其中一个</span>，解压软件会自动识别文件夹内其他压缩包分卷。按住鼠标左键框选，右键解压 📦</p>
+
+                <img src="./img/input_file_2.png" alt="Bandizip解压示例" class="tutorial-img">
+                <p class="img-caption">▲ 推荐使用Bandizip等软件进行“智能解压”</p>
+
+                <p><b>2. 自带安装程序</b></p>
+                <p>部分资源下载好之后会自带安装程序，运行后选择要安装到什么位置就行。</p>
+
+                <img src="./img/input_file_3.png" alt="运行安装程序" class="tutorial-img">
+                <p class="img-caption">▲ 找到分卷中的 .exe 后缀安装程序运行</p>
+
+                <p><span class="highlight-red underline bold-text">特别提醒：选择游戏安装路径，整个路径都不要有中文或者符号，否则游戏无法运行！！</span> 为了区分游戏，可以使用拼音命名 🔠</p>
+
+                <img src="./img/input_file_4.png" alt="安装路径示例" class="tutorial-img">
+                <p class="img-caption">▲ 如图所示，路径保持全英文（如 F:\game\gta5）</p>
+
+                <p>安装完成之后运行带游戏图标的 <span class="bold-text">.exe</span> 程序即可启动安装 🚀</p>
+
+                <img src="./img/input_file_5.png" alt="启动游戏程序" class="tutorial-img">
+                <p class="img-caption">▲ 在文件夹中找到游戏主程序运行</p>
+            </div>
+        </details>
+
+        <details>
+            <summary>🌐 核心资源下载网站合集（防止迷路）</summary>
+            <div class="details-content">
+                <p class="center-text"><b>为防止部分资源网站被封，建议多收藏几个备份 📂</b></p>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>Game520 |</b> 🔗<a href="https://www.gamer520.com">www.gamer520.com</a><br>
+                    可下载PC单机游戏和主机游戏。
+                    <img src="./img/1.png" alt="Gamer520" class="tutorial-img">
+                    <img src="./img/2.png" alt="Gamer520" class="tutorial-img">
+                    <img src="./img/3.png" alt="Gamer520" class="tutorial-img">
+                    由于网盘速度受限，建议充SVIP或采用网站自带的国外网盘下载。
+                    <img src="./img/4.png" alt="国外网盘下载" class="tutorial-img">
+                    <img src="./img/5.png" alt="国外网盘下载" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>Switch游戏下载站 |</b> 🔗<a href="https://www.switchxiazai.com">www.switchxiazai.com</a><br>
+                    可下载主机游戏，主机游戏通常是指PS平台或者Switch掌机游戏，文件通常以XCI和NSP结尾
+                    此类游戏为主机端独占，非电脑游戏，所以需要用到Switch模拟器（龙神模拟器或者yuzu模拟器）
+                    <img src="./img/6.png" alt="Switch游戏下载站" class="tutorial-img">
+                    <span class="point">▶</span><b> 龙神（ryujinx）模拟器：</b> 🔗<a href="https://ryujinx.app">https://ryujinx.app</a>
+                    <img src="./img/7.png" alt="龙神（ryujinx）模拟器" class="tutorial-img">
+                    <span class="highlight-red underline">需下载与版本相匹配的key和固件</span>
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>野野游戏公会 |</b> 🔗<a href="https://yeye.click">https://yeye.click</a><br>
+                    <img src="./img/8.png" alt="野野游戏公会" class="tutorial-img">
+                    包含 <span class="highlight-red underline">D加密懒人启动包</span>，对玩D加密游戏的人非常友好！👍
+                    <img src="./img/9.png" alt="D加密懒人启动包" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>芝士游戏 |</b> 🔗<a href="https://www.cheesegame.org">www.cheesegame.org</a><br>
+                    可下载PC单机游戏，包含可联机版本。
+                    <img src="./img/10.png" alt="芝士游戏" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>方舟游戏 |</b> 🔗<a href="https://www.fzgamer.com">www.fzgamer.com</a><br>
+                    可下载PC单机游戏和手机游戏。
+                    <img src="./img/11.png" alt="方舟游戏" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>123资源库 |</b> 🔗<a href="https://www.123zyk.com/rank">www.123zyk.com/rank</a><br>
+                    可下载很多资源（嗯，对，很多资源~_~）
+                    <img src="./img/12.png" alt="123资源库" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>Online Fix |</b> 🔗<a href="https://online-fix.me">https://online-fix.me</a><br>
+                    <span class="highlight-red">【联机】</span> 网站游戏全部可联机！俄罗斯网站需翻译，搜索用英文名。使用迅雷下载种子。
+                    <img src="./img/13.png" alt="Online Fix" class="tutorial-img">
+                    <img src="./img/14.png" alt="Online Fix" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>FreeTP |</b> 🔗<a href="https://freetp.org">https://freetp.org</a><br>
+                    <span class="highlight-red">【联机】</span> 网站游戏全部可联机！俄罗斯网站需翻译，搜索用英文名。使用迅雷下载种子。
+                    <img src="./img/15.png" alt="FreeTP" class="tutorial-img">
+                    <img src="./img/16.png" alt="FreeTP" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>Switch618 |</b> 🔗<a href="https://www.switch618.com">www.switch618.com</a><br>
+                    可下载PC单机游戏和Online Fix的联机补丁。
+                    <img src="./img/17.png" alt="Switch618" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>RooterGames |</b> 🔗<a href="https://rutor-org.games">https://rutor-org.games</a><br>俄区优质资源，迅雷种子下载。
+                    <img src="./img/18.png" alt="RooterGames" class="tutorial-img">
+                    <img src="./img/19.png" alt="RooterGames" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>BYRUTOR |</b> 🔗<a href="https://byrutgame.org">https://byrutgame.org</a><br>俄区优质资源，迅雷种子下载。
+                    <img src="./img/20.png" alt="BYRUTOR" class="tutorial-img">
+                    <img src="./img/21.png" alt="BYRUTOR" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>上游世界 |</b> 🔗<a href="https://www.vgter.net">www.vgter.net</a><br>可下载PC游戏和主机游戏
+                    <img src="./img/22.png" alt="上游世界" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b>• Koyso |</b> 🔗<a href="https://koysobackup.com">koysobackup.com</a><br>可下载PC游戏和<span style="color:#ffd700;">......游戏😗</span>
+                    <img src="./img/23.png" alt="Koyso" class="tutorial-img">
+                </div>
+
+                <div class="site-card">
+                    <b><span class="point">●</span>3DM/游侠/游民星空</b> |
+                    <br> 🔗<a href=" https://dl.3dmgame.com">https://dl.3dmgame.com</a>
+                    <br> 🔗<a href="https://down.ali213.net">https://down.ali213.net/</a>
+                    <br> 🔗<a href="https://www.gamersky.com/">https://www.gamersky.com/</a>
+                    <br>国内三大元老，可以下载单机游戏、修改器、Mod、补丁、环境运行库
+                </div>
+
+                <div class="site-card" style="border-left-color: #4caf50;">
+                    <b><span class="point">●</span>植物大战僵尸杂交版</b> | 🔗<a href="https://pvzgame.app/">https://pvzgame.app/</a>
+                    <br>推荐个摸鱼小游戏，电脑手机都可以下载🌻
+                    <img src="./img/24.png" alt="植物大战僵尸杂交版" class="tutorial-img">
+                </div>
+            </div>
+        </details>
+
+        <h2>👾特殊下载</h2>
+        <details>
+            <summary>SteamTools假入库</summary>
+            <div class="details-content">
+                <p>如果觉得盗版下载麻烦可以使用SteamTools假入库游戏（网游、需其他平台验证的游戏、D加密游戏不行），好处就是免去了网盘下载的繁琐流程，坏处就是没有DLC</p>
+                <b><span class="point">●</span>SteamTools|</b> 🔗<a href="https://www.steamtools.net">https://www.steamtools.net</a>
+                <img src="./img/25.png" alt="SteamTools" class="tutorial-img">
+                <b><span class="point">●</span>Steam清单下载工具|</b> 🔗<a href="https://steam.assiw.xyz">https://steam.assiw.xyz</a>
+                <img src="./img/26.png" alt="Steam清单下载工具" class="tutorial-img">
+                <b>1.</b>打开Steam，找到想要的游戏，记住游戏的App ID号（网址栏里的数字）
+                <img src="./img/27.png" alt="App ID" class="tutorial-img">
+                <b>2.</b>打开SteamTools（<span class="highlight-red">SteamTools打开后有点小仔细找一下</span>🔍）和Steam游戏清单工具
+                <img src="./img/28.png" alt="SteamTools" class="tutorial-img">
+                <b>3.</b>点击下载，免费获得卡密
+                <img src="./img/29.png" alt="免费获得卡密" class="tutorial-img">
+                <b>4.</b>将下载好的压缩包打开，把里面的lua文件拖入SteamTools中
+                <img src="./img/30.png" alt="lua" class="tutorial-img">
+                <b>5.</b>在任务栏右下角退出Steam，然后再重新打开Steam就可以在库中找到添加的游戏
+                <br><b>6.</b>删除游戏需要找到Steam这个软件安装的路径，而不是游戏安装的路径，直接从库中是删不掉的
+                <br>路径：<span style="color:#ff0000;">安装盘:\Steam\config\stplug-in</span>
+                <img src="./img/31.png" alt="lua" class="tutorial-img">
+                <b>7.</b>右键删除后再次重启Steam即可完全删除
+                <p><span class="highlight-red">【Q：这种假入库的方法会被封号吗？】</span><br> <span class="bold-text">【A：不会！</span>这是最新的假入库方法，被检测到最多会把游戏从账号中移除，但游戏文件夹还在。如果担心封号请开小号游玩🔧<span class="bold-text">】</span></p>
+            </div>
+        </details>
+
+        <h2>⚔️ 盗版如何联机</h2>
+        <details>
+            <summary>🌐 两种核心联机途径详解</summary>
+            <div class="details-content">
+                <p class="center-text bold-text" style="color:#ff7675;">【注意】如果遇到网络不稳定，请务必开启加速器！🚀</p>
+
+                <p><b>一、局域网联机</b></p>
+                <p>需要所有玩家在同一网络，推荐使用：
+                    <br>
+                <p><span class="point">●</span><b>Radmin LAN：</b>
+                    🔗 <a href="https://www.radmin-lan.cn">www.radmin-lan.cn</a>
+                    <br>Radmin LAN的作用就是把玩家放在同一网络下
+                    <img src="./img/32.png" alt="Radmin LAN" class="tutorial-img">
+                    一人建房，另一人加入即可。<span style="color:#ff0000;">前提：游戏版本必须相同 💻</span>
+                </p>
+                <img src="./img/33.png" alt="Radmin LAN" class="tutorial-img">
+
+                <p><b>二、P2P联机（联机补丁）</b></p>
+                <p>通过在游戏本体文件夹注入补丁实现联机。原理是将盗版伪装成Steam测试联机功能的游戏（如 <span class="underline">Spacewar、Cube Racer、Codename Gordon等</span>）运行补丁时会自动把这些游戏添加到你的Steam账户中，不需要自己手动添加 🛸</p>
+                <p class="center-text bold-text" style="color:#ff7675;">联机补丁可以作用于任何版本游戏本体，盗版或者假入库，但建议下载与游戏版本相匹配的补丁，因为有些游戏会更新🔄</p>
+                <p><span class="point">●</span> <b>联机补丁下载站：</b></p>
+                <ul>
+                    <li><b>FreeTP:</b> 🔗<a href="https://freetp.org">freetp.org</a></li>
+                    例如：
+                    <b>1.</b>下载联机补丁
+                    <img src="./img/34.png" alt="FreeTP" class="tutorial-img">
+                    <img src="./img/35.png" alt="FreeTP" class="tutorial-img">
+                    <b>2.</b>下载好之后是exe结尾的运行程序，点击运行
+                    <img src="./img/36.png" alt="FreeTP" class="tutorial-img">
+                    <img src="./img/37.png" alt="FreeTP" class="tutorial-img">
+                    <b>3.</b>选择游戏本体文件夹
+                    <img src="./img/38.png" alt="FreeTP" class="tutorial-img">
+                    <img src="./img/39.png" alt="FreeTP" class="tutorial-img">
+                    <img src="./img/40.png" alt="FreeTP" class="tutorial-img">
+                    <b>4.</b>等待安装完成
+                    <p style="margin-top: 3em;">
+                        <li><b>Switch618:</b> 🔗<a href="https://www.switch618.com/">www.switch618.com</a></li>
+                    </p>
+                    Swicth618里包含了Online Fix中文网
+                    <img src="./img/41.png" alt="Online Fix中文网" class="tutorial-img">
+                    <li><b>Online Fix中文网：</b> 🔗<a href="www.onlinefix618.com">www.onlinefix618.com</a></li>
+                    <b>1.</b>注册账号并下载联机补丁
+                    <img src="./img/42.png" alt="Online Fix中文网" class="tutorial-img">
+                    <b>2.</b>将下载好的压缩包解压，把文件夹内的所有文件拖入游戏本体文件夹内，选择替换所有文件🔄
+                    <img src="./img/43.png" alt="Online Fix中文网" class="tutorial-img">
+                </ul>
+
+                <p><span class="highlight-red">【Q：这种伪装成其他游戏进行联机的方法会被封号吗？】</span><br> <span class="bold-text">【A：不会！</span>这种方法已经存在很多年了，网上也从来没有见过被封的经历，如果担心请开小号联机🛡️<span class="bold-text">】</span></p>
+            </div>
+        </details>
+
+        <footer class="center-text" style="margin-top: 50px; padding-bottom: 20px; color: #636e72; font-size: 0.9em;">
+            <h3><b>教程结束，祝大家游戏愉快</b> 🎮</h3>
+            <b>D加密暂不更新...😪</b>
+        </footer>
+    </div>
+
+
+<div id="music-player-container">
+    <!-- 左侧唱片 -->
+    <div class="disc-wrapper pulse-guide" id="main-disc" onclick="togglePlay()">
+        <img src="" class="disc-img" id="track-cover">
+        <div style="position:absolute; color:white; font-size:12px; text-shadow:1px 1px 2px #000;" id="center-status">▶</div>
+    </div>
+
+    
+    <div class="player-controls-box">
+        <div class="music-info-text">
+            <span class="music-title" id="track-title">歌曲加载中...</span>
+            <span class="music-artist" id="track-artist">歌手</span>
+        </div>
+        
+        <div class="buttons-group">
+            <span class="ctrl-btn" onclick="prevTrack()">⏮</span>
+            <span class="ctrl-btn" onclick="togglePlay()" id="play-pause-btn" style="font-size:20px;">▶</span>
+            <span class="ctrl-btn" onclick="nextTrack()">⏭</span>
+            
+            <div class="volume-box">
+                <span style="font-size:12px;">🔊</span>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5" oninput="changeVolume(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <audio id="main-audio"></audio>
+</div>
+
+<script>
+    // 歌单配置
+    const playlist = [
+        {
+            title: "晴天",
+            artist: "周杰伦",
+            cover: "./img/222.png",
+            url: "./music/晴天_周杰伦.mp3"
+        },
+        {
+            title: "Where_memory_had_stopped",
+            artist: "July",
+            cover: "./img/Where.jpg",
+            url: "./music/Where_memory_had_stopped_July.mp3"
+        },
+        {
+            title: "Time_To_Love",
+            artist: "OCTOBER",
+            cover: "./img/Time.jpg",
+            url: "./music/Time_To_Love_OCTOBER.mp3"
+        },
+        {
+            title: "怪物之歌",
+            artist: "酸电池",
+            cover: "./img/GW.jpg",
+            url: "./music/怪物之歌_酸电池.mp3"
+        },
+        {
+            title: "Mr.＂Broken_Heart＂",
+            artist: "松下優也",
+            cover: "./img/Mr.jpg",
+            url: "./music/Mr.＂Broken_Heart＂_松下優也.mp3"
+        },
+        {
+            title: "Promise",
+            artist: "山岡晃",
+            cover: "./img/Promise.jpg",
+            url: "./music/Promise_山岡晃.mp3"
+        },
+        {
+            title: "Memories",
+            artist: "ＴＲＡ＄H",
+            cover: "./img/Memories.jpg",
+            url: "./music/Memories_ＴＲＡ＄H.mp3"
+        },
+        {
+            title: "Letter That Writing in the Wind",
+            artist: "July",
+            cover: "./img/Letter.jpg",
+            url: "./music/Letter That Writing in the Wind_july.mp3"
+        },
+        {
+            title: "玫瑰花的葬礼",
+            artist: "许嵩",
+            cover: "./img/MGHDZL.jpg",
+            url: "./music/玫瑰花的葬礼_许嵩.mp3"
+        },
+        {
+            title: "Brightside",
+            artist: "Beatsbyaura",
+            cover: "./img/Brightside.jpg",
+            url: "./music/Brightside_Beatsbyaura.mp3"
+        },
+        {
+            title: "His_Theme",
+            artist: "Toby_Fox",
+            cover: "./img/His.jpg",
+            url: "./music/His_Theme_Toby_Fox.mp3"
+        },
+        {
+            title: "M3",
+            artist: "Les_Apollo",
+            cover: "./img/M3.jpg",
+            url: "./music/M3_Les_Apollo.mp3"
+        },
+    ];
+
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+
+    const audio = document.getElementById('main-audio');
+    const trackCover = document.getElementById('track-cover');
+    const trackTitle = document.getElementById('track-title');
+    const trackArtist = document.getElementById('track-artist');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const centerStatus = document.getElementById('center-status');
+    const volumeSlider = document.getElementById('volume-slider');
+
+        function loadTrack(index) {
+        const track = playlist[index];
+        audio.src = track.url;
+        trackCover.src = track.cover;
+        trackTitle.innerText = track.title;
+        trackArtist.innerText = track.artist;
+    }
+
+    
+    function togglePlay() {
+        
+        const discWrapper = document.getElementById('main-disc'); 
+
+        if (isPlaying) {
+            
+            audio.pause();
+            trackCover.style.animationPlayState = 'paused'; // 唱片停止旋转
+            playPauseBtn.innerText = '▶';
+            centerStatus.innerText = '▶';
+            centerStatus.style.display = 'block';
+            
+            
+            if (discWrapper) discWrapper.classList.add('pulse-guide'); 
+        } else {
+            
+            audio.play().catch(e => console.log("浏览器拦截了自动播放，需点击页面"));
+            trackCover.style.animationPlayState = 'running'; 
+            playPauseBtn.innerText = '⏸';
+            centerStatus.style.display = 'none';
+            
+            
+            if (discWrapper) discWrapper.classList.remove('pulse-guide');
+        }
+        isPlaying = !isPlaying;
+    }
+
+    
+    function nextTrack() {
+        currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+        loadTrack(currentTrackIndex);
+        isPlaying = false;
+        togglePlay();
+    }
+
+    
+    function prevTrack() {
+        currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+        loadTrack(currentTrackIndex);
+        isPlaying = false;
+        togglePlay();
+    }
+
+    
+    function changeVolume(value) {
+        audio.volume = value;
+    }
+
+    
+    audio.addEventListener('ended', () => {
+        nextTrack();
+    });
+// --- 随机乱跑版精灵系统 ---
+const spriteConfig = {
+    images: [
+        './gif/1.gif', 
+        './gif/2.png',
+        './gif/3.gif',
+        './gif/4.gif',
+        './gif/5.gif',
+        './gif/6.gif',
+        './gif/7.gif',
+        './gif/8.gif',
+        './gif/9.gif',
+        './gif/10.gif',
+        './gif/11.gif',
+    ],
+    speed: 1,               // 移动速度
+    changeDirFreq: 0.01,    // 乱跑频率
+    maxSprites: 4,          // 屏幕上同时存在的数量 (建议 3-6 个，效果更好)
+    minLife: 5000,          // 每个精灵最少待多久 (5秒)
+    maxLife: 12000          // 每个精灵最多待多久 (12秒)
+};
+
+// 当前在池子中可用的图片索引
+let pool = [];
+
+function initSpriteSystem() {
+    if (!document.getElementById('sprite-layer')) {
+        const div = document.createElement('div');
+        div.className = 'sprite-container';
+        div.id = 'sprite-layer';
+        document.body.appendChild(div);
+    }
+    // 初始化池子，包含所有图片的索引
+    pool = Array.from({length: spriteConfig.images.length}, (_, i) => i);
+    
+    // 初始启动
+    for (let i = 0; i < spriteConfig.maxSprites; i++) {
+        // 错开每个精灵的出场时间，不要一起蹦出来
+        setTimeout(spawnSprite, i * 2000); 
+    }
+}
+
+function spawnSprite() {
+    const container = document.getElementById('sprite-layer');
+    
+    // 如果池子里没图了，就不生成（正常不会发生，因为我们会还回去）
+    if (pool.length === 0) return;
+
+    // 1. 从池子里随机抽一张图，并移除它
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const imageIndex = pool.splice(randomIndex, 1)[0];
+    const imageUrl = spriteConfig.images[imageIndex];
+
+    // 2. 创建图片元素
+    const sprite = document.createElement('img');
+    sprite.src = imageUrl;
+    sprite.className = 'sprite';
+    
+    const size = Math.floor(Math.random() * 40) + 50; // 50-90px
+    sprite.style.width = size + 'px';
+    
+    // 3. 初始随机位置
+    let x = Math.random() * (window.innerWidth - size);
+    let y = Math.random() * (window.innerHeight - size);
+    let angle = Math.random() * Math.PI * 2;
+    let dx = Math.cos(angle) * spriteConfig.speed;
+    let dy = Math.sin(angle) * spriteConfig.speed;
+    
+    container.appendChild(sprite);
+
+    // 4. 进场：下一帧加上 active 类实现淡入
+    requestAnimationFrame(() => {
+        sprite.classList.add('active');
+    });
+
+    // 5. 动画逻辑
+    let animationId;
+    function animate() {
+        if (Math.random() < spriteConfig.changeDirFreq) {
+            angle += (Math.random() - 0.5) * 2;
+            dx = Math.cos(angle) * spriteConfig.speed;
+            dy = Math.sin(angle) * spriteConfig.speed;
+        }
+        x += dx; y += dy;
+        if (x < 0 || x > window.innerWidth - size) { dx *= -1; angle = Math.atan2(dy, dx); }
+        if (y < 0 || y > window.innerHeight - size) { dy *= -1; angle = Math.atan2(dy, dx); }
+        
+        sprite.style.left = x + 'px';
+        sprite.style.top = y + 'px';
+        sprite.style.transform = dx > 0 ? 'scaleX(1)' : 'scaleX(-1)';
+        
+        animationId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    // 6. 退休逻辑：设定随机寿命
+    const lifeTime = Math.random() * (spriteConfig.maxLife - spriteConfig.minLife) + spriteConfig.minLife;
+    
+    setTimeout(() => {
+        // A. 开始淡出
+        sprite.classList.remove('active');
+        
+        // B. 等淡出动画结束后 (1秒)，彻底移除
+        setTimeout(() => {
+            cancelAnimationFrame(animationId); // 停止动画计算
+            sprite.remove();                   // 从网页删除
+            pool.push(imageIndex);             // 把图片索引还回池子
+            
+            // C. 立即派出一个新的替代它
+            spawnSprite();
+        }, 1000); 
+
+    }, lifeTime);
+}
+
+// 启动系统
+initSpriteSystem();
+    
+window.onload = () => {
+    loadTrack(currentTrackIndex); 
+    audio.volume = 0.5;           
+
+    // 1. 【微信专用】尝试在进入页面时直接播放 (微信环境特权)
+    document.addEventListener("WeixinJSBridgeReady", function () {
+        audio.play().then(() => {
+            // 如果微信成功自动播放，同步 UI 状态
+            isPlaying = true;
+            const discWrapper = document.getElementById('main-disc');
+            trackCover.style.animationPlayState = 'running';
+            playPauseBtn.innerText = '⏸';
+            centerStatus.style.display = 'none';
+            if (discWrapper) discWrapper.classList.remove('pulse-guide');
+        }).catch(e => console.log("微信自动播放受限"));
+    }, false);
+
+    // 2. 【通用移动端/电脑端】点击屏幕任何地方解锁播放
+    const unlockAudio = (event) => {
+        if (!isPlaying) {
+            audio.play().then(() => {
+                // 播放成功后的状态同步
+                isPlaying = true;
+                const discWrapper = document.getElementById('main-disc');
+                trackCover.style.animationPlayState = 'running';
+                playPauseBtn.innerText = '⏸';
+                centerStatus.style.display = 'none';
+                if (discWrapper) discWrapper.classList.remove('pulse-guide');
+            }).catch(error => {
+                console.log("播放仍被拦截:", error);
+            });
+        }
+        
+        // 成功触发后，移除监听器，防止重复执行
+        ['click', 'touchstart', 'mousedown'].forEach(evt => {
+            document.removeEventListener(evt, unlockAudio);
+        });
+    };
+
+    // 监听多种交互事件
+    ['click', 'touchstart', 'mousedown'].forEach(evt => {
+        document.addEventListener(evt, unlockAudio);
+    });
+};
+</script>
+</body>
+
+</html>
