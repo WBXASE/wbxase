@@ -169,27 +169,39 @@ html, body {
         }
         
                 .container {
-    width: 94%; /* 稍微缩小一点点 */
+    width: 94%;
     max-width: 900px;
-    margin: 20px auto; /* 使用 auto 居中，减少冲突 */
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(15px);
+    margin: 40px 10px;
+    /* 修改：透明度从 0.92 降到 0.2，背景更透 */
+    background: rgba(255, 255, 255, 0.2); 
+    /* 修改：模糊从 15px 提高到 20px，毛玻璃感更强 */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px); /* 兼容苹果手机浏览器 */
+    
     border-radius: 25px;
-    padding: 20px; /* 移动端 padding 稍微减小一点 */
+    padding: 30px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     line-height: 1.8;
-    word-wrap: break-word; /* 防止长链接撑破容器 */
+    position: relative; /* 建议加上，确保层级正确 */
+    z-index: 1;
 }
 
 /* 针对手机端的特殊优化 */
 @media (max-width: 600px) {
     .container {
-        width: 96%;
-        margin: 10px auto;
-        padding: 15px;
+        /* 让容器只占据屏幕宽度的 85%，左右各留出 7.5% 的背景 */
+        width: 85%; 
+        margin: 20px auto; 
+        padding: 18px;
+        /* 稍微加深一点阴影，让卡片在背景上更有浮动感 */
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2); 
     }
-}
-        
+
+    /* 内部图片确保适配变窄后的容器 */
+    .tutorial-img {
+        width: 100%;
+    }
+}        
                 h1 {
             text-align: center;
             font-size: 2.2em;
@@ -214,14 +226,15 @@ html, body {
         
        
         details {
-            margin-bottom: 15px;
-            border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            border: 1px solid #eee;
-            display: block;
-        }
+    margin-bottom: 15px;
+    border-radius: 12px;
+    /* 改为半透明白色，0.7 可以根据喜好调整 */
+    background: rgba(255, 255, 255, 0.7); 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* 边框也变浅一点 */
+    display: block;
+}
         
         summary {
             padding: 15px 20px;
@@ -236,7 +249,7 @@ html, body {
             color: #2d3436;
         }
         
-        summary:hover { background: #f9f9f9; }
+        summary:hover { background: rgba(255, 255, 255, 0.6); }
         
         summary::after { content: "➕"; font-size: 0.8em; transition: 0.3s; }
         details[open] summary::after { content: "➖"; transform: rotate(180deg); }
@@ -271,12 +284,13 @@ html, body {
         
         
         .site-card {
-            background: #f8f9fa;
-            border-left: 4px solid #23a6d5;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 0 8px 8px 0;
-        }
+    /* 改为半透明浅灰色 */
+    background: rgba(248, 249, 250, 0.4); 
+    border-left: 4px solid #23a6d5;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 0 8px 8px 0;
+}
         
         a { color: #0984e3; text-decoration: none; font-weight: bold; }
         a:hover { text-decoration: underline; color: #e73c7e; }
@@ -296,7 +310,7 @@ html, body {
     <div class="container">
         <h1>✨ 游戏资源与联机保姆级教程 ✨</h1>
 
-        <div class="center-text" style="background: #fff3f3; padding: 15px; border-radius: 15px; border: 1px solid #ffcdd2; margin-bottom: 20px;">
+        <div class="center-text" style="background: rgba(255, 243, 243, 0.5); padding: 15px; border-radius: 15px; border: 1px solid #ffcdd2; margin-bottom: 20px;">
             <p><b>一、</b> 市面上的游戏分为盗版和正版，盗版又称“破解版”和“学习版”，究其本质是在游戏文件内注入破解补丁，破解游戏加密，绕开Steam正版加密检测机制，其游戏内容并无差别 🎮</p>
             <p><b>二、</b> 盗版游戏与正版游戏最大的区别就是<span class="highlight-red underline">多人联机和好友联机</span>，因此大多数盗版游戏是单机游戏，此教程将告诉你如何<span class="highlight-blue">打通第三面墙</span>，解决好友之间的联机问题。多人联机是指某个游戏玩的人多，服主开的私人服务器，如果能在联机大厅内搜索到服务器即可加入，与好友之间联机方法同理 🤝</p>
             <p><b>三、</b> <span class="highlight-red">【注意】</span>盗版游戏无法与正版联机，也无法玩大型多人网游，只能让<span style="color:#ff0000;">盗版和盗版联机，版本号和版本号一样的联机</span> ⚠️</p>
@@ -306,7 +320,7 @@ html, body {
         <h2>📦 资源的获取和下载</h2>
         <p class="center-text bold-text">以下网站资源全为 <span class="highlight-red">免费</span>！<br>如有需求只需注册即可 🔑</p>
 
-        <details open>
+        <details>
             <summary>💡 一、事先声明：网盘会员问题</summary>
             <div class="details-content">
                 <p><b>注：由于大部分资源需要网盘保存并下载，但是网盘下载速度受限制，需要充SVIP才可以提速，所以先告诉大家如何获取会员</b> 🚀</p>
