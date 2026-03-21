@@ -7,6 +7,60 @@
     <title>齐民要术（游戏版🎮）</title>
     <link rel="shortcut icon" " href="./img/333.png" type="image/x-icon">
     <style>
+/* 修改原有的容器，确保动画平滑 */
+#music-player-container {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 隐藏状态：向左偏移，保留一小部分可见 */
+#music-player-container.collapsed {
+    transform: translateX(calc(-100% + 30px)) !important; /* 留30px在屏幕内 */
+    opacity: 0.7;
+}
+
+/* 侧边收缩/展开按钮样式 */
+#player-shrink-btn {
+    position: absolute;
+    right: -20px; /* 贴在播放器右边缘外侧 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-left: none;
+    border-radius: 0 15px 15px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    color: #444;
+    transition: background 0.3s;
+    z-index: 10001;
+}
+
+#player-shrink-btn:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* 箭头旋转动画 */
+.arrow-icon {
+    transition: transform 0.5s;
+    display: inline-block;
+}
+
+#music-player-container.collapsed .arrow-icon {
+    transform: rotate(180deg); /* 隐藏时箭头指向右 */
+}
+
+/* 移动端适配：缩小按钮点击区域 */
+@media (max-width: 600px) {
+    #player-shrink-btn { width: 25px; right: -25px; height: 60px; font-size: 16px; }
+}
+
 html, body {
     width: 100%;
     overflow-x: hidden; /* 禁止横向滚动 */
@@ -559,35 +613,55 @@ html, body {
 
 
 <div id="music-player-container">
-    <!-- 左侧唱片 -->
+    <!-- 新增：收起按钮 -->
+    <div id="player-shrink-btn" onclick="toggleCollapse(event)">
+        <span class="arrow-icon">◀</span>
+    </div>
+
+    <!-- 原有的内容保留 -->
     <div class="disc-wrapper pulse-guide" id="main-disc" onclick="togglePlay()">
         <img src="" class="disc-img" id="track-cover">
         <div style="position:absolute; color:white; font-size:12px; text-shadow:1px 1px 2px #000;" id="center-status">▶</div>
     </div>
-
     
     <div class="player-controls-box">
+        <!-- ... 这里的控件代码保持不变 ... -->
         <div class="music-info-text">
             <span class="music-title" id="track-title">歌曲加载中...</span>
             <span class="music-artist" id="track-artist">歌手</span>
         </div>
-        
         <div class="buttons-group">
             <span class="ctrl-btn" onclick="prevTrack()">⏮</span>
             <span class="ctrl-btn" onclick="togglePlay()" id="play-pause-btn" style="font-size:20px;">▶</span>
             <span class="ctrl-btn" onclick="nextTrack()">⏭</span>
-            
             <div class="volume-box">
                 <span style="font-size:12px;">🔊</span>
                 <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5" oninput="changeVolume(this.value)">
             </div>
         </div>
     </div>
-
     <audio id="main-audio"></audio>
 </div>
 
 <script>
+// 切换播放器收起/展开
+function toggleCollapse(event) {
+    // 阻止事件冒泡，防止触发播放器的其他点击事件
+    event.stopPropagation();
+    const container = document.getElementById('music-player-container');
+    container.classList.toggle('collapsed');
+}
+
+// 建议在已有的 togglePlay 函数中加入：如果点击播放时是收起状态，自动展开
+const originalTogglePlay = togglePlay;
+togglePlay = function() {
+    const container = document.getElementById('music-player-container');
+    if (container.classList.contains('collapsed')) {
+        container.classList.remove('collapsed');
+    }
+    originalTogglePlay();
+};
+
     // 歌单配置
     const playlist = [
         {
