@@ -7,6 +7,16 @@
     <title>齐民要术（游戏版🎮）</title>
     <link rel="shortcut icon" " href="./img/333.png" type="image/x-icon">
     <style>
+html, body {
+    width: 100%;
+    overflow-x: hidden; /* 禁止横向滚动 */
+    position: relative;
+}
+
+/* 建议把所有元素的盒模型设为 border-box，防止 padding 撑开宽度 */
+* {
+    box-sizing: border-box;
+}
 /* 网页小精灵容器 */
 .sprite {
     position: absolute;
@@ -158,16 +168,26 @@
         }
         
                 .container {
-            width: 95%;
-            max-width: 900px;
-            margin: 40px 10px;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(15px);
-            border-radius: 25px;
-            padding: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            line-height: 1.8;
-        }
+    width: 94%; /* 稍微缩小一点点 */
+    max-width: 900px;
+    margin: 20px auto; /* 使用 auto 居中，减少冲突 */
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(15px);
+    border-radius: 25px;
+    padding: 20px; /* 移动端 padding 稍微减小一点 */
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    line-height: 1.8;
+    word-wrap: break-word; /* 防止长链接撑破容器 */
+}
+
+/* 针对手机端的特殊优化 */
+@media (max-width: 600px) {
+    .container {
+        width: 96%;
+        margin: 10px auto;
+        padding: 15px;
+    }
+}
         
                 h1 {
             text-align: center;
