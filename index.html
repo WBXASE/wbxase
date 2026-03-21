@@ -19,13 +19,14 @@ html, body {
 }
 /* 网页小精灵容器 */
 .sprite {
-    position: absolute;
+    position: fixed; /* 从 absolute 改为 fixed */
     will-change: transform;
-    /* 增加透明度过渡，让出现和消失更平滑 */
     opacity: 0; 
     transition: opacity 1s ease-in-out;
     pointer-events: none;
     z-index: 9998;
+    top: 0; /* 初始位置 */
+    left: 0;
 }
 
 /* 当加上这个类名时，小精灵显示 */
@@ -247,14 +248,17 @@ html, body {
         
        
         .tutorial-img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            display: block;
-            margin: 15px auto;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border: 2px solid #fff;
-        }
+    display: block;
+    /* 核心修改：确保图片永远不会超过父容器宽度 */
+    max-width: 100% !important; 
+    height: auto !important; /* 保持比例 */
+    border-radius: 12px;
+    margin: 15px auto;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    border: 2px solid #fff;
+    /* 新增：防止某些极端情况下的盒子撑开 */
+    box-sizing: border-box; 
+}
         
         .img-caption {
             text-align: center;
